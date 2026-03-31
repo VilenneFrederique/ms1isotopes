@@ -123,7 +123,7 @@ pytest tests/
 
 If you use ms1isotopes in your research, please cite:
 
-> [JOSS paper citation will go here]
+> [Work in progress]
 
 ## License
 
