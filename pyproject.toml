@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ms1isotopes"
-version = "0.1.0"
+version = "0.2.0"
 description = "Extract and evaluate MS1 isotope distributions from LC-MS/MS proteomics data"
 readme = "README.md"
 license = {text = "GPL-3.0-or-later"}
