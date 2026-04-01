@@ -210,6 +210,8 @@ def extract_ion_chromatogram(
                     "Intensity": max_intensity,
                 })
 
+    if not records:
+        return pd.DataFrame(columns=["SpectraID", "RetentionTime", "Intensity"])
     return pd.DataFrame(records)
 
 
