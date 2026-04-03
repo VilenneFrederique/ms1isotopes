@@ -33,6 +33,10 @@ WATER_AVG = 18.0153
 PROTON = 1.007276
 CAM_MASS = 57.021464   # Carbamidomethylation
 OX_MASS = 15.994915    # Oxidation
+CYSTEINYLATION_MASS = 119.0041  # Cysteine modification by iodoacetamide
+PYRO_GLU_FROM_E_MASS = -18.0106  # Pyro-glutamate from glutamic acid
+PYRO_GLU_FROM_Q_MASS = -17.0265  # Pyro-glutamate from glutamine
+ACETYLANTION_MASS = 42.0106  # N-terminal acetylation
 
 
 def peptide_mass(
@@ -40,7 +44,11 @@ def peptide_mass(
     mass_type: str = "monoisotopic",
     n_carbamidomethyl: int = 0,
     n_oxidation: int = 0,
-) -> float:
+    n_cysteinylation: int = 0,
+    n_pyro_glu_E: int = 0,
+    n_pyro_glu_Q: int = 0,
+    n_acetylation: int = 0
+    ) -> float:
     """
     Compute neutral peptide mass.
 
@@ -54,7 +62,14 @@ def peptide_mass(
         Number of CAM-modified cysteines.
     n_oxidation : int
         Number of oxidised methionines.
-
+    n_cysteinylation : int
+        Number of cysteine modifications by iodoacetamide.
+    n_pyro_glu_E : int
+        Number of pyro-glutamate modifications on E.
+    n_pyro_glu_Q : int
+        Number of pyro-glutamate modifications on Q.
+    n_acetylation : int
+        Number of N-terminal acetylations.
     Returns
     -------
     float
@@ -71,7 +86,10 @@ def peptide_mass(
 
     mass += CAM_MASS * n_carbamidomethyl
     mass += OX_MASS * n_oxidation
-
+    mass += CYSTEINYLATION_MASS * n_cysteinylation
+    mass += PYRO_GLU_FROM_E_MASS * n_pyro_glu_E
+    mass += PYRO_GLU_FROM_Q_MASS * n_pyro_glu_Q
+    mass += ACETYLANTION_MASS * n_acetylation
     return mass
 
 

@@ -41,6 +41,10 @@ AMINO_ACID_COMPOSITION: Dict[str, Dict[str, int]] = {
 MODIFICATIONS = {
     "Carbamidomethyl": {"C": 2, "H": 3, "N": 1, "O": 1, "S": 0},  # +57.0215 on C
     "Oxidation": {"C": 0, "H": 0, "N": 0, "O": 1, "S": 0},         # +15.9949 on M
+    "Cysteinylation": {"C": 3, "H": 5, "N": 1, "O": 2, "S": 1},      # +119.0041 on C by iodoacetamide
+    "Pyro_Glu_from_E": {"C": 0, "H": -2, "N": 0, "O": -1, "S": 0},   # -18.0106 on E
+    "Pyro_Glu_from_Q": {"C": 0, "H": -3, "N": -1, "O": 0, "S": 0},   # -17.0265 on Q
+    "Acetylation": {"C": 2, "H": 2, "N": 0, "O": 1, "S": 0},          # +42.0106 on N-term
 }
 
 
@@ -49,7 +53,11 @@ def sequence_to_composition(
     charge_state: int = 0,
     n_carbamidomethyl: int = 0,
     n_oxidation: int = 0,
-) -> Dict[str, int]:
+    n_cysteinylation: int = 0,
+    n_pyro_glu_E: int = 0,
+    n_pyro_glu_Q: int = 0,
+    n_acetylation: int = 0
+    ) -> Dict[str, int]:
     """
     Convert a peptide sequence to atomic composition.
 
@@ -63,7 +71,14 @@ def sequence_to_composition(
         Number of carbamidomethylated cysteines.
     n_oxidation : int
         Number of oxidised methionines.
-
+    n_cysteinylation : int
+        Number of cysteine modifications by iodoacetamide.
+    n_pyro_glu_E : int
+        Number of pyro-glutamate modifications on E.
+    n_pyro_glu_Q : int
+        Number of pyro-glutamate modifications on Q.
+    n_acetylation : int
+        Number of N-terminal acetylations.
     Returns
     -------
     dict
@@ -86,7 +101,14 @@ def sequence_to_composition(
         comp[el] += count * n_carbamidomethyl
     for el, count in MODIFICATIONS["Oxidation"].items():
         comp[el] += count * n_oxidation
-
+    for el, count in MODIFICATIONS["Cysteinylation"].items():
+        comp[el] += count * n_cysteinylation
+    for el, count in MODIFICATIONS["Pyro_Glu_from_E"].items():
+        comp[el] += count * n_pyro_glu_E
+    for el, count in MODIFICATIONS["Pyro_Glu_from_Q"].items():
+        comp[el] += count * n_pyro_glu_Q
+    for el, count in MODIFICATIONS["Acetylation"].items():
+        comp[el] += count * n_acetylation
     # Protonation
     comp["H"] += charge_state
 

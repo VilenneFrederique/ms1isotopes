@@ -225,21 +225,25 @@ REQUIRED_COLUMNS = [
 ]
 
 
-def parse_modifications(mod_string: str) -> Tuple[int, int]:
+def parse_modifications(mod_string: str) -> Tuple[int, int, int, int, int, int]:
     """
     Parse modification string to count CAM cysteines and oxidised methionines.
 
     Handles formats like:
     - "C(57.0214)" or "2C(57.0214)M(15.9949)"
-    - NaN / None / "None" → (0, 0)
+    - NaN / None / "None" → (0, 0, 0, 0, 0)
     """
     if pd.isna(mod_string) or mod_string == "None" or mod_string is None:
-        return 0, 0
+        return 0, 0, 0, 0, 0, 0
 
     mod_str = str(mod_string)
     n_cam = len(re.findall(r"C\(57\.0214\)", mod_str))
     n_ox = len(re.findall(r"M\(15\.9949\)", mod_str))
-    return n_cam, n_ox
+    n_cysteinylation = len(re.findall(r"C\(119\.0041\)", mod_str))
+    n_pyro_glu_E = len(re.findall(r"E\(-18\.0106\)", mod_str))
+    n_pyro_glu_Q = len(re.findall(r"Q\(-17\.0265\)", mod_str))
+    n_acetylation = len(re.findall(r"Acetylation\(42\.0106\)", mod_str))
+    return n_cam, n_ox, n_cysteinylation, n_pyro_glu_E, n_pyro_glu_Q, n_acetylation
 
 
 def validate_input(df: pd.DataFrame) -> None:
@@ -306,11 +310,11 @@ def extract_ms1_isotope_distributions(
         rt_before = float(row["RetentionTimeWindowBefore"])
         rt_after = float(row["RetentionTimeWindowAfter"])
 
-        n_cam, n_ox = parse_modifications(modifications)
+        n_cam, n_ox, n_cysteinylation, n_pyro_glu_E, n_pyro_glu_Q, n_acetylation = parse_modifications(modifications)
 
         # --- Compute masses ---
-        mono_mass = peptide_mass(sequence, "monoisotopic", n_cam, n_ox)
-        avg_mass = peptide_mass(sequence, "average", n_cam, n_ox)
+        mono_mass = peptide_mass(sequence, "monoisotopic", n_cam, n_ox, n_cysteinylation, n_pyro_glu_E, n_pyro_glu_Q, n_acetylation)
+        avg_mass = peptide_mass(sequence, "average", n_cam, n_ox, n_cysteinylation, n_pyro_glu_E, n_pyro_glu_Q, n_acetylation)
         theo_mz = mass_to_mz(mono_mass, charge, isotope=0)
 
         # Use observed m/z if provided, else theoretical
@@ -331,7 +335,7 @@ def extract_ms1_isotope_distributions(
             continue
 
         # --- Theoretical isotope distribution (via brainpy) ---
-        comp = sequence_to_composition(sequence, charge, n_cam, n_ox)
+        comp = sequence_to_composition(sequence, charge, n_cam, n_ox, n_cysteinylation, n_pyro_glu_E, n_pyro_glu_Q, n_acetylation)
         theo_mzs, theo_intensities = theoretical_isotope_distribution(comp, n_isotopes)
 
         # --- Extract isotopes from each spectrum in the XIC ---
